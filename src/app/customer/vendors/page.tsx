@@ -1,13 +1,15 @@
 export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { calculateDistance, formatINR, pricingTier } from "@/lib/utils";
-import { MapPin, Star } from "lucide-react";
+import { Info, MapPin, Star } from "lucide-react";
 import BookServiceForm from "@/components/customer/BookServiceForm";
 import LocationButton from "@/components/customer/LocationButton";
 import VendorMap from "@/components/customer/VendorMap";
 
 /** Hyper-local search radius, in kilometres. */
 const NEARBY_RADIUS_KM = 10;
+/** Graceful degradation: when nobody is inside the radius, show at most this many nearest vendors. */
+const FALLBACK_LIMIT = 12;
 
 /** First string of a searchParams value (Next may pass string | string[]). */
 function firstParam(value: string | string[] | undefined): string | undefined {
@@ -50,31 +52,40 @@ export default async function VendorList({
 
   type VendorRow = (typeof approved)[number] & { distanceKm: number | null };
 
-  /* With the user's coordinates: Haversine per vendor → keep only those
-     within the 10 km radius → nearest first. Without: show everyone. */
-  const vendors: VendorRow[] = hasLocation
-    ? approved
-        .filter((v) => v.lat !== null && v.lng !== null)
-        .map((v) => ({ ...v, distanceKm: calculateDistance(userLat, userLng, v.lat!, v.lng!) }))
-        .filter((v) => v.distanceKm! <= NEARBY_RADIUS_KM)
-        .sort((a, b) => a.distanceKm! - b.distanceKm!)
-    : approved.map((v) => ({ ...v, distanceKm: null }));
+  /* Every vendor we can locate, Haversine-sorted nearest first. */
+  const located: VendorRow[] = approved
+    .filter((v) => v.lat !== null && v.lng !== null)
+    .map((v) => ({ ...v, distanceKm: calculateDistance(userLat, userLng, v.lat!, v.lng!) }))
+    .sort((a, b) => a.distanceKm! - b.distanceKm!);
+
+  const inRadius = located.filter((v) => v.distanceKm! <= NEARBY_RADIUS_KM);
+  /* Never dead-end: if nobody is inside the radius, degrade to the nearest vendors. */
+  const usingFallback = hasLocation && inRadius.length === 0;
+
+  const vendors: VendorRow[] = !hasLocation
+    ? approved.map((v) => ({ ...v, distanceKm: null }))
+    : usingFallback
+      ? located.slice(0, FALLBACK_LIMIT)
+      : inRadius;
+
+  const subtitle = !hasLocation
+    ? "Book tailoring and cobbler services near you."
+    : inRadius.length > 0
+      ? `Showing ${vendors.length} vendor${vendors.length === 1 ? "" : "s"} within ${NEARBY_RADIUS_KM} km of you — nearest first.`
+      : `No vendors within ${NEARBY_RADIUS_KM} km yet — showing the ${vendors.length} nearest to you.`;
 
   return (
     <div className="max-w-6xl mx-auto p-6 mt-6">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Find a Vendor</h1>
-          <p className="text-slate-500 mt-1">
-            {hasLocation
-              ? `Showing ${vendors.length} vendor${vendors.length === 1 ? "" : "s"} within ${NEARBY_RADIUS_KM} km of you — nearest first.`
-              : "Book tailoring and cobbler services near you."}
-          </p>
+          <p className="text-slate-500 mt-1">{subtitle}</p>
         </div>
         <LocationButton active={hasLocation} />
       </div>
 
-      {hasLocation && vendors.length > 0 && (
+      {/* Map always shows in nearby mode — even with zero pins it centers on the user */}
+      {hasLocation && (
         <section className="mb-8">
           <VendorMap
             userLat={userLat}
@@ -90,13 +101,25 @@ export default async function VendorList({
         </section>
       )}
 
+      {usingFallback && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
+          <Info className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            No vendors within {NEARBY_RADIUS_KM} km of you yet — showing the nearest vendors to
+            your location instead. New workshops onboard every week.
+          </p>
+        </div>
+      )}
+
       {vendors.length === 0 && (
         <div className="rounded-xl border border-slate-200 bg-white p-10 text-center shadow-sm">
           <p className="font-medium text-slate-900">
-            No vendors within {NEARBY_RADIUS_KM} km of you yet
+            {hasLocation ? "No vendors found near your location yet" : "No vendors yet"}
           </p>
           <p className="mt-1 text-sm text-slate-500">
-            Clear the location filter to browse all vendors.
+            {hasLocation
+              ? "Clear the location filter to browse all vendors."
+              : "Check back soon — vendors are onboarding."}
           </p>
         </div>
       )}

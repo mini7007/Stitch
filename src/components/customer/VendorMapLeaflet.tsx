@@ -2,7 +2,7 @@
 
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { Circle, MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { Circle, CircleMarker, MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 export type MapVendor = {
   id: string;
@@ -54,6 +54,16 @@ export default function VendorMapLeaflet({
           fillOpacity: 0.08,
         }}
       />
+      {/* the user — always visible, even when no vendors are nearby */}
+      <CircleMarker
+        center={[userLat, userLng]}
+        radius={8}
+        pathOptions={{ color: "#ffffff", weight: 2.5, fillColor: "#f59e0b", fillOpacity: 1 }}
+      >
+        <Popup>
+          <p className="font-semibold text-slate-900">You are here</p>
+        </Popup>
+      </CircleMarker>
       {vendors.map((vendor) => (
         <Marker key={vendor.id} position={[vendor.lat, vendor.lng]}>
           <Popup>

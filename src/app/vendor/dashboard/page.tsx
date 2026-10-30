@@ -7,6 +7,7 @@ import { formatINR } from "@/lib/utils";
 import { statusIndex } from "@/lib/roles";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import OrderStatusSelect from "@/components/vendor/OrderStatusSelect";
+import VendorLocationCard from "@/components/vendor/VendorLocationCard";
 import { Clock, Hammer, PackageCheck, Wallet } from "lucide-react";
 
 const BADGE_STYLES: Record<string, string> = {
@@ -94,6 +95,9 @@ export default async function VendorDashboard() {
             </div>
           ))}
         </div>
+
+        {/* ---- workshop location (hyper-local search visibility) ---- */}
+        <VendorLocationCard lat={vendor.lat} lng={vendor.lng} />
 
         {/* ---- orders ---- */}
         <div className="mt-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/60 shadow-xl">

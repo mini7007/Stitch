@@ -44,19 +44,16 @@ export default function LocationButton({ active }: { active: boolean }) {
 
   if (active) {
     return (
-      <div className="flex flex-col items-end gap-1">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">
-            <MapPin className="h-4 w-4" /> Nearby mode on
-          </span>
-          <button
-            onClick={() => router.push("/customer/vendors")}
-            className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 transition-colors hover:bg-slate-50"
-          >
-            <X className="h-3.5 w-3.5" /> Clear
-          </button>
-        </div>
-        {error && <p className="max-w-xs text-right text-xs text-red-600">{error}</p>}
+      <div className="flex items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">
+          <MapPin className="h-4 w-4" /> Nearby mode on
+        </span>
+        <button
+          onClick={() => router.push("/customer/vendors")}
+          className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 transition-colors hover:bg-slate-50"
+        >
+          <X className="h-3.5 w-3.5" /> Clear
+        </button>
       </div>
     );
   }
