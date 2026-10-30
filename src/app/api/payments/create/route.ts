@@ -1,37 +1,22 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { PaymentStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { PAYMENT_MODE } from "@/lib/payments";
 
 /**
  * POST /api/payments/create — LIVE MODE ONLY
  *
- * Creates a real Razorpay order / payment link for UPI collection.
- * Currently a placeholder: 501 until Razorpay keys are configured.
+ * Creates a Razorpay Payment Link (hosted UPI checkout) for an unpaid order
+ * and returns { paymentUrl } — the client redirects to it. Confirmation is
+ * asynchronous: the signed Razorpay webhook (/api/webhooks/razorpay) marks
+ * the payment PAID and advances the order.
  *
- * When implementing:
- *   1. `npm install razorpay`
- *   2. Validate the session user owns the (unpaid) order in the DB.
- *   3. Create the Razorpay order:
- *
- *        const razorpay = new Razorpay({
- *          key_id: process.env.RAZORPAY_KEY_ID!,
- *          key_secret: process.env.RAZORPAY_KEY_SECRET!,
- *        });
- *        const rzpOrder = await razorpay.orders.create({
- *          amount: order.total,        // paise
- *          currency: "INR",
- *          receipt: order.id,
- *        });
- *
- *   4. Return what the client needs:
- *        - Checkout.js flow → { keyId: process.env.RAZORPAY_KEY_ID, razorpayOrderId: rzpOrder.id, amount: order.total }
- *        - Payment link / QR flow → { paymentUrl: link.short_url } or { qrDataUrl: <data url> }
- *
- *   Confirmation does NOT happen here — it arrives asynchronously via the
- *   Razorpay webhook (/api/webhooks/razorpay), which marks the payment PAID.
+ * Uses the plain REST API (Basic auth) — no SDK dependency required.
+ * Docs: https://razorpay.com/docs/api/payment-links/
  */
-export async function POST(_req: Request) {
+export async function POST(req: Request) {
   if (PAYMENT_MODE !== "live") {
     return NextResponse.json(
       { error: "Live payments are disabled in demo mode." },
@@ -44,9 +29,72 @@ export async function POST(_req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // TODO: implement Razorpay order creation (steps above) after keys are set.
-  return NextResponse.json(
-    { error: "Online payments aren't wired up yet — Razorpay setup pending." },
-    { status: 501 }
-  );
+  const { orderId } = await req.json().catch(() => ({ orderId: null }));
+  if (typeof orderId !== "string") {
+    return NextResponse.json({ error: "orderId is required" }, { status: 400 });
+  }
+
+  // Ownership + eligibility check
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order || order.customerId !== session.user.id) {
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
+  if (order.paymentStatus === "PAID") {
+    return NextResponse.json({ ok: true, alreadyPaid: true });
+  }
+
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keyId || !keySecret) {
+    return NextResponse.json(
+      { error: "Razorpay keys not configured — set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your deployment environment." },
+      { status: 503 }
+    );
+  }
+
+  // Create the hosted payment link (amounts are in paise)
+  const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin;
+
+  const rzpRes = await fetch("https://api.razorpay.com/v1/payment_links", {
+    method: "POST",
+    headers: { authorization: `Basic ${auth}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      amount: order.total, // paise
+      currency: "INR",
+      accept_partial: false,
+      reference_id: order.id, // comes back in webhooks → maps to our order
+      description: `Stitch order ${order.orderNumber}`,
+      customer: { name: session.user.name ?? undefined, email: session.user.email ?? undefined },
+      redirect_url: `${appUrl}/customer/orders/${order.id}`, // return to tracking page
+      // UPI-first checkout page
+      config: { checkout: { method: { netbanking: "1", card: "1", upi: "1", wallet: "1" } } },
+    }),
+  });
+
+  if (!rzpRes.ok) {
+    const err = await rzpRes.json().catch(() => ({}));
+    console.error("Razorpay payment link failed:", rzpRes.status, err);
+    return NextResponse.json(
+      { error: "Could not create the payment link — please try again." },
+      { status: 502 }
+    );
+  }
+
+  const link = (await rzpRes.json()) as { short_url: string; id: string };
+
+  // Record the pending payment so the webhook has a row to confirm
+  await prisma.payment.upsert({
+    where: { orderId: order.id },
+    create: {
+      orderId: order.id,
+      amount: order.total,
+      status: PaymentStatus.PENDING,
+      method: "UPI",
+      reference: link.id,
+    },
+    update: { status: PaymentStatus.PENDING, method: "UPI", reference: link.id },
+  });
+
+  return NextResponse.json({ ok: true, paymentUrl: link.short_url });
 }

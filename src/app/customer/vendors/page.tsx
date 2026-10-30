@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { formatINR } from "@/lib/utils";
 import { MapPin, Star } from "lucide-react";

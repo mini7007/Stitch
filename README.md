@@ -156,20 +156,44 @@ Locally, `.env.local` sets `demo`. For production, `.env.production` sets `live`
 2. **Set the env vars** on your production host (or in `.env.production`):
    ```env
    NEXT_PUBLIC_PAYMENT_MODE="live"
+   NEXT_PUBLIC_APP_URL="https://<your-domain>"        # used to return users from Razorpay
    RAZORPAY_KEY_ID="rzp_live_xxxxxxxx"
    RAZORPAY_KEY_SECRET="xxxxxxxxxxxx"
    RAZORPAY_WEBHOOK_SECRET="a-strong-random-string"
    ```
-3. **Implement order creation** in `src/app/api/payments/create/route.ts`
-   (`npm install razorpay`, then follow the commented steps — create a Razorpay
-   order for `order.total` paise and return `{ paymentUrl }` or `{ qrDataUrl }`;
-   the client already handles both).
+3. **That's it for creation** — `POST /api/payments/create` is fully implemented:
+   it creates a Razorpay **Payment Link** (hosted UPI checkout) via the REST API
+   (no SDK needed), records a `PENDING` Payment row, and returns
+   `{ paymentUrl }` — the client redirects to it and users land back on the
+   tracking page afterwards.
 4. **Set up the webhook** — Razorpay Dashboard → *Settings → Webhooks* → URL
-   `https://<your-domain>/api/webhooks/razorpay`, events `payment.captured` +
-   `payment.failed`, and put the same secret in `RAZORPAY_WEBHOOK_SECRET`. Then
-   uncomment the implementation in `src/app/api/webhooks/razorpay/route.ts` —
-   the signature-verified handler marks the payment PAID and advances the order
-   exactly like the demo route does.
+   `https://<your-domain>/api/webhooks/razorpay`, events `payment_link.paid`,
+   `payment.captured` + `payment.failed`, and put the same secret in
+   `RAZORPAY_WEBHOOK_SECRET`. The handler verifies the HMAC signature
+   (timing-safe), maps the event back to the order, and idempotently marks the
+   payment PAID → order ACCEPTED → timeline updated.
+
+---
+
+## 🚢 Deployment (Vercel)
+
+Pushes to `main` auto-deploy (Vercel Git integration). Set these env vars in
+**Vercel → Project → Settings → Environment Variables** (Production):
+
+| Variable | Value |
+| --- | --- |
+| `DATABASE_URL` | Your Neon connection string (pooled) |
+| `NEXTAUTH_URL` | `https://<your-domain>` |
+| `NEXTAUTH_SECRET` | Long random string (`openssl rand -base64 32`) |
+| `NEXT_PUBLIC_APP_URL` | `https://<your-domain>` |
+| `NEXT_PUBLIC_PAYMENT_MODE` | `live` |
+| `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` | From Razorpay (empty = live checkout shows "not configured") |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth — add `https://<your-domain>/api/auth/callback/google` to the authorized redirect URIs |
+| `ADMIN_INVITE_CODE` | Strong random string (NOT the demo one) |
+
+Every page that reads the database is rendered dynamically
+(`export const dynamic = "force-dynamic"`), so the build never touches Prisma —
+it only needs the env vars at runtime.
 
 ---
 
