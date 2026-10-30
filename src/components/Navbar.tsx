@@ -17,7 +17,8 @@ export default function Navbar() {
     pathname === "/" ||
     pathname === "/signup" ||
     pathname.startsWith("/vendor") ||
-    pathname.startsWith("/admin")
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/customer")
   ) {
     return null;
   }

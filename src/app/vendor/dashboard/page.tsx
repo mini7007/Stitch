@@ -4,23 +4,18 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { formatINR } from "@/lib/utils";
-import { statusIndex } from "@/lib/roles";
+import { OrderStatus, PaymentStatus } from "@prisma/client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import StatCard from "@/components/ui/StatCard";
+import EmptyState from "@/components/ui/EmptyState";
+import DataTable, { type DashboardOrderRow } from "@/components/ui/DataTable";
 import OrderStatusSelect from "@/components/vendor/OrderStatusSelect";
 import VendorLocationCard from "@/components/vendor/VendorLocationCard";
-import { Clock, Hammer, PackageCheck, Wallet } from "lucide-react";
+import VendorRevenueChart from "@/components/vendor/VendorRevenueChart";
+import CopyProfileLink from "@/components/vendor/CopyProfileLink";
+import { CheckCircle2, Hourglass, Package, Star } from "lucide-react";
 
-const BADGE_STYLES: Record<string, string> = {
-  PENDING: "bg-amber-500/15 text-amber-400 ring-amber-500/30",
-  ACCEPTED: "bg-sky-500/15 text-sky-400 ring-sky-500/30",
-  PICKED_UP: "bg-indigo-500/15 text-indigo-300 ring-indigo-500/30",
-  IN_PROGRESS: "bg-violet-500/15 text-violet-300 ring-violet-500/30",
-  READY: "bg-teal-500/15 text-teal-300 ring-teal-500/30",
-  OUT_FOR_DELIVERY: "bg-blue-500/15 text-blue-300 ring-blue-500/30",
-  DELIVERED: "bg-emerald-500/15 text-emerald-400 ring-emerald-500/30",
-  CANCELLED: "bg-red-500/15 text-red-400 ring-red-500/30",
-  DISPUTED: "bg-red-500/15 text-red-400 ring-red-500/30",
-};
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default async function VendorDashboard() {
   const session = await getServerSession(authOptions);
@@ -32,6 +27,7 @@ export default async function VendorDashboard() {
     include: {
       orders: {
         orderBy: { createdAt: "desc" },
+        take: 60,
         include: {
           customer: true,
           items: { include: { service: true } },
@@ -43,36 +39,83 @@ export default async function VendorDashboard() {
   if (!vendor) redirect("/");
 
   const orders = vendor.orders;
-  const awaitingPayment = orders.filter((o) => o.paymentStatus === "PENDING" && o.status === "PENDING");
-  const active = orders.filter(
-    (o) => o.paymentStatus === "PAID" && statusIndex(o.status) > 0 && statusIndex(o.status) < 6
-  );
-  const delivered = orders.filter((o) => o.status === "DELIVERED");
-  const revenue = orders
-    .filter((o) => o.paymentStatus === "PAID")
+
+  /* ---- stats ---- */
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEarnings = orders
+    .filter((o) => o.paymentStatus === PaymentStatus.PAID && o.createdAt >= todayStart)
     .reduce((sum, o) => sum + o.total, 0);
 
-  const stats = [
-    { icon: Wallet, label: "Awaiting Payment", value: String(awaitingPayment.length) },
-    { icon: Hammer, label: "Active Jobs", value: String(active.length) },
-    { icon: PackageCheck, label: "Delivered", value: String(delivered.length) },
-    { icon: Clock, label: "Lifetime Earnings*", value: formatINR(revenue) },
-  ];
+  const pendingOrders = orders.filter((o) => o.status === OrderStatus.PENDING).length;
+  const completedOrders = orders.filter((o) => o.status === OrderStatus.DELIVERED).length;
+
+  /* ---- 7-day revenue buckets (oldest → today) ---- */
+  const buckets: { label: string; earnings: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const day = new Date(now);
+    day.setDate(day.getDate() - i);
+    const start = new Date(day);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(day);
+    end.setHours(23, 59, 59, 999);
+    const earnings = orders
+      .filter((o) => o.paymentStatus === PaymentStatus.PAID && o.createdAt >= start && o.createdAt <= end)
+      .reduce((sum, o) => sum + o.total, 0);
+    buckets.push({
+      label: i === 0 ? "Today" : DAYS[day.getDay()],
+      earnings,
+    });
+  }
+
+  const yesterday = buckets[5].earnings;
+  const earningsTrend =
+    todayEarnings !== yesterday && yesterday + todayEarnings > 0
+      ? {
+          text: `${todayEarnings >= yesterday ? "+" : "−"}${
+            yesterday > 0
+              ? `${Math.round((Math.abs(todayEarnings - yesterday) / yesterday) * 100)}%`
+              : "100%"
+          }`,
+          positive: todayEarnings >= yesterday,
+        }
+      : null;
+
+  /* ---- table rows ---- */
+  const rows: DashboardOrderRow[] = orders.map((order) => ({
+    id: order.id,
+    orderNumber: order.orderNumber,
+    createdAt: order.createdAt.toISOString(),
+    customerName: order.customer.name,
+    serviceName: order.items.map((i) => i.service.name).join(", ") || undefined,
+    total: order.total,
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+    action:
+      order.status === OrderStatus.PENDING && order.paymentStatus !== PaymentStatus.PAID ? (
+        <span className="whitespace-nowrap text-xs font-medium text-amber-600">Awaiting payment</span>
+      ) : (
+        <OrderStatusSelect orderId={order.id} currentStatus={order.status} />
+      ),
+  }));
+
+  const isEmpty = orders.length === 0;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-200">
+    <div className="min-h-screen bg-slate-50">
       <DashboardHeader subtitle="Vendor Studio" email={session.user?.email} badge="Vendor" />
 
       <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl text-white">{vendor.businessName}</h1>
-            <p className="mt-1 text-sm text-zinc-500">
+            <h1 className="font-display text-3xl text-slate-900">{vendor.businessName}</h1>
+            <p className="mt-1 text-sm text-slate-500">
               Manage incoming orders and keep customers updated.
             </p>
           </div>
           {vendor.status !== "APPROVED" && (
-            <span className="rounded-full border border-sky-500/40 bg-sky-500/10 px-4 py-1.5 text-xs font-semibold text-sky-300">
+            <span className="rounded-full border border-sky-200 bg-sky-50 px-4 py-1.5 text-xs font-semibold text-sky-700">
               {vendor.status === "PENDING"
                 ? "Profile awaiting admin approval — you won't appear in search yet"
                 : "Profile suspended — contact support"}
@@ -80,109 +123,64 @@ export default async function VendorDashboard() {
           )}
         </div>
 
-        {/* ---- stats ---- */}
-        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-2xl border border-white/10 bg-zinc-900/60 p-5"
-            >
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/30">
-                <s.icon className="h-4 w-4" />
-              </span>
-              <p className="mt-3 font-display text-2xl text-white">{s.value}</p>
-              <p className="text-xs text-zinc-500">{s.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* ---- workshop location (hyper-local search visibility) ---- */}
+        {/* ---- workshop location (nearby-search visibility) ---- */}
         <VendorLocationCard lat={vendor.lat} lng={vendor.lng} />
 
-        {/* ---- orders ---- */}
-        <div className="mt-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/60 shadow-xl">
-          <div className="border-b border-white/10 px-6 py-5">
-            <h2 className="font-display text-xl text-white">Orders</h2>
-            <p className="text-xs text-zinc-500">
-              *Lifetime earnings are before the 5% platform fee.
-            </p>
+        {isEmpty ? (
+          <div className="mt-8">
+            <EmptyState
+              icon={Package}
+              title="Waiting for your first order"
+              subtitle="Share your profile with customers — once an order arrives it will appear here with full tracking."
+              action={<CopyProfileLink vendorId={vendor.id} />}
+            />
           </div>
+        ) : (
+          <>
+            {/* ---- stats ---- */}
+            <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <StatCard title="Today's Earnings" value={formatINR(todayEarnings)} icon={<CheckCircle2 className="h-5 w-5" />} trend={earningsTrend} delay={0} />
+              <StatCard title="Pending Orders" value={String(pendingOrders)} icon={<Hourglass className="h-5 w-5" />} delay={0.06} />
+              <StatCard title="Completed Orders" value={String(completedOrders)} icon={<Package className="h-5 w-5" />} delay={0.12} />
+              <StatCard title="Average Rating" value={vendor.rating.toFixed(1)} icon={<Star className="h-5 w-5" />} delay={0.18} />
+            </div>
 
-          {orders.length === 0 ? (
-            <div className="px-6 py-16 text-center">
-              <Hammer className="mx-auto h-8 w-8 text-zinc-700" />
-              <p className="mt-4 font-display text-lg text-zinc-400">No orders yet</p>
-              <p className="mt-1 text-sm text-zinc-600">
-                Once customers book your services, they&apos;ll appear here.
-              </p>
+            {/* ---- revenue chart ---- */}
+            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-display text-xl text-slate-900">Earnings</h2>
+                  <p className="text-xs text-slate-500">Paid orders over the last 7 days.</p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <VendorRevenueChart data={buckets} />
+              </div>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[860px] text-sm">
-                <thead>
-                  <tr className="border-b border-white/10 text-left text-[11px] uppercase tracking-wider text-zinc-500">
-                    <th className="px-6 py-3.5 font-semibold">Order</th>
-                    <th className="px-4 py-3.5 font-semibold">Customer</th>
-                    <th className="px-4 py-3.5 font-semibold">Service</th>
-                    <th className="px-4 py-3.5 font-semibold">Total</th>
-                    <th className="px-4 py-3.5 font-semibold">Status</th>
-                    <th className="px-6 py-3.5 font-semibold">Update</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {orders.map((order) => {
-                    const item = order.items[0];
-                    const paid = order.paymentStatus === "PAID";
-                    return (
-                      <tr key={order.id} className="transition-colors hover:bg-white/[0.03]">
-                        <td className="px-6 py-4">
-                          <span className="font-mono text-xs text-amber-400">{order.orderNumber}</span>
-                          <p className="mt-0.5 text-[11px] text-zinc-500">
-                            {new Date(order.createdAt).toLocaleDateString("en-IN", {
-                              day: "numeric",
-                              month: "short",
-                            })}
-                          </p>
-                        </td>
-                        <td className="px-4 py-4 text-zinc-300">{order.customer.name}</td>
-                        <td className="px-4 py-4">
-                          <span className="text-zinc-300">{item?.service.name ?? "—"}</span>
-                          {item && item.quantity > 1 && (
-                            <span className="text-zinc-500"> × {item.quantity}</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className="font-semibold text-white">{formatINR(order.total)}</span>
-                          <p className={`text-[11px] ${paid ? "text-emerald-400" : "text-amber-500"}`}>
-                            {paid ? "Paid" : "Unpaid"}
-                          </p>
-                        </td>
-                        <td className="px-4 py-4">
-                          <span
-                            className={`inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ring-1 ${
-                              BADGE_STYLES[order.status] ?? "bg-zinc-500/15 text-zinc-300 ring-zinc-500/30"
-                            }`}
-                          >
-                            {order.status.replace(/_/g, " ")}
-                          </span>
-                        </td>
-                        <td className="w-52 px-6 py-4">
-                          {order.status === "PENDING" && !paid ? (
-                            <span className="flex items-center gap-1.5 text-xs text-amber-500">
-                              <Wallet className="h-3.5 w-3.5" /> Awaiting customer payment
-                            </span>
-                          ) : (
-                            <OrderStatusSelect orderId={order.id} currentStatus={order.status} />
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+
+            {/* ---- incoming orders ---- */}
+            <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-200 px-6 py-5">
+                <h2 className="font-display text-xl text-slate-900">Incoming Orders</h2>
+                <p className="text-xs text-slate-500">
+                  Move an order forward — the customer sees every update live.
+                </p>
+              </div>
+              <DataTable
+                rows={rows}
+                showService
+                pageSize={6}
+                empty={
+                  <EmptyState
+                    icon={Package}
+                    title="Waiting for your first order"
+                    subtitle="Share your profile — new orders land here."
+                  />
+                }
+              />
             </div>
-          )}
-        </div>
+          </>
+        )}
       </main>
     </div>
   );

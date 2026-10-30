@@ -67,26 +67,26 @@ export default function VendorLocationCard({
   }
 
   return (
-    <div className="mt-8 rounded-3xl border border-white/10 bg-zinc-900/60 p-6 shadow-xl">
+    <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-start gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/30">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-600 ring-1 ring-amber-200">
             <MapPin className="h-4 w-4" />
           </span>
           <div>
-            <h2 className="font-display text-lg text-white">Workshop location</h2>
-            <p className="mt-0.5 text-sm text-zinc-500">
+            <h2 className="font-display text-lg text-slate-900">Workshop location</h2>
+            <p className="mt-0.5 text-sm text-slate-500">
               {isSet
                 ? `Set to ${lat!.toFixed(4)}, ${lng!.toFixed(4)} — customers nearby can find you in search.`
                 : "Not set yet — you will NOT appear in the customer “Nearby Vendors” search until it is."}
             </p>
-            {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
           </div>
         </div>
         <button
           onClick={updateLocation}
           disabled={locating || saving}
-          className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 px-5 py-2.5 text-sm font-medium text-amber-400 transition-all hover:bg-amber-500 hover:text-zinc-950 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-700 active:scale-95 disabled:opacity-60"
         >
           {locating || saving ? (
             <>

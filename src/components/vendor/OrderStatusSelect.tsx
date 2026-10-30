@@ -33,7 +33,7 @@ export default function OrderStatusSelect({
   const currentIdx = statusIndex(currentStatus);
   const options = ORDER_FLOW.slice(currentIdx + 1);
 
-  if (options.length === 0) return <span className="text-xs text-zinc-500">Completed</span>;
+  if (options.length === 0) return <span className="text-xs text-slate-400">Completed</span>;
 
   async function apply() {
     if (!value) return;
@@ -62,9 +62,9 @@ export default function OrderStatusSelect({
         <select
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-2 text-xs text-zinc-200 focus:border-amber-500/60 focus:outline-none"
+          className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 focus:border-amber-500 focus:outline-none"
         >
-          <option value="" disabled className="bg-zinc-900">
+          <option value="" disabled>
             Move to…
           </option>
           {options.map((s) => (
