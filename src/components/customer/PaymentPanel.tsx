@@ -215,6 +215,15 @@ export default function PaymentPanel({
                   </>
                 )}
               </button>
+
+              {/* Emergency bypass — super-admin only (enforced server-side) */}
+              <button
+                onClick={simulatePayment}
+                disabled={loading}
+                className="text-[11px] text-zinc-600 underline decoration-zinc-800 underline-offset-4 transition-colors hover:text-zinc-400 disabled:opacity-50"
+              >
+                Having payment issues? Force Mock Payment (Dev)
+              </button>
             </>
           )}
         </div>

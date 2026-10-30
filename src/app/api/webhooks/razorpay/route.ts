@@ -47,6 +47,9 @@ export async function POST(req: Request) {
       };
     };
 
+    // Debugging aid (visible in Vercel runtime logs)
+    console.log("Webhook received:", event);
+
     const payment = event.payload?.payment?.entity;
     const link = event.payload?.payment_link?.entity;
 

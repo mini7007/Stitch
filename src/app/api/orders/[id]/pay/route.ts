@@ -17,15 +17,25 @@ export async function POST(
   _req: Request,
   { params }: { params: { id: string } }
 ) {
-  if (PAYMENT_MODE !== "demo") {
+  const session = await getServerSession(authOptions);
+
+  /* Mock confirmations: allowed for EVERYONE in demo mode, and for the
+     super-admin in live mode (emergency bypass to keep testing the rest
+     of the app when Razorpay is failing). */
+  const SUPER_ADMIN_EMAIL = "mohan5050390@gmail.com";
+  const isSuperAdmin = session?.user?.email === SUPER_ADMIN_EMAIL;
+
+  if (PAYMENT_MODE !== "demo" && !isSuperAdmin) {
     return NextResponse.json(
       { error: "Mock payments are disabled in live mode — confirmations arrive via the Razorpay webhook." },
       { status: 403 }
     );
   }
 
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "CUSTOMER") {
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (session.user.role !== "CUSTOMER" && !isSuperAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
