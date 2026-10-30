@@ -43,6 +43,8 @@ export default async function VendorList({
   const userLng = Number(lngParam);
   const hasLocation =
     latParam !== undefined && lngParam !== undefined && Number.isFinite(userLat) && Number.isFinite(userLng);
+  /* Location came from the IP fallback in LocationButton — city-level accuracy. */
+  const approximate = hasLocation && firstParam(searchParams?.src) === "ip";
 
   // Fetch approved vendors from the database
   const approved = await prisma.vendor.findMany({
@@ -71,7 +73,7 @@ export default async function VendorList({
   const subtitle = !hasLocation
     ? "Book tailoring and cobbler services near you."
     : inRadius.length > 0
-      ? `Showing ${vendors.length} vendor${vendors.length === 1 ? "" : "s"} within ${NEARBY_RADIUS_KM} km of you — nearest first.`
+      ? `Showing ${vendors.length} vendor${vendors.length === 1 ? "" : "s"} within ${NEARBY_RADIUS_KM} km of you${approximate ? " (approximate location)" : ""} — nearest first.`
       : `No vendors within ${NEARBY_RADIUS_KM} km yet — showing the ${vendors.length} nearest to you.`;
 
   return (
