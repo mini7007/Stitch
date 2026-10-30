@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { getSession, signIn } from "next-auth/react";
 import { ArrowLeft, Building2, Loader2, Scissors, UserRound } from "lucide-react";
 import { roleHome } from "@/lib/roles";
+import Wordmark from "@/components/Wordmark";
 
 type Role = "CUSTOMER" | "VENDOR";
 
@@ -65,7 +66,7 @@ export default function SignupPage() {
   const inputCls =
     "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 transition-colors focus:border-amber-500/60 focus:outline-none";
   const labelCls =
-    "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500";
+    "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500";
 
   return (
     <div className="relative min-h-screen bg-zinc-950 text-zinc-200">
@@ -81,8 +82,7 @@ export default function SignupPage() {
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-amber-500 text-zinc-950">
             <Scissors className="h-4 w-4" />
           </span>
-          <span className="font-display text-xl tracking-[0.3em] text-white">STITCH</span>
-        </Link>
+          <Wordmark className="text-xl text-white" />        </Link>
         <Link
           href="/"
           className="flex items-center gap-1.5 text-sm text-zinc-400 transition-colors hover:text-amber-400"
@@ -96,9 +96,9 @@ export default function SignupPage() {
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="rounded-[26px] bg-gradient-to-b from-amber-400/80 via-amber-600/25 to-amber-400/60 p-[1.5px] shadow-[0_0_80px_-20px_rgba(245,158,11,0.4)]"
+          className="rounded-2xl border border-white/10 bg-zinc-900/40 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.8)] backdrop-blur-sm"
         >
-          <div className="rounded-[24px] bg-zinc-950 p-8">
+          <div className="p-8">
             <div className="mb-6 text-center">
               <h1 className="font-display text-3xl text-white">Create your account</h1>
               <p className="mt-1.5 text-sm text-zinc-400">
@@ -196,7 +196,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3.5 text-sm font-semibold text-zinc-950 shadow-[0_0_30px_-8px_rgba(245,158,11,0.7)] transition-all hover:bg-amber-400 hover:scale-[1.02] active:scale-95 disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-400 active:scale-[0.99] disabled:opacity-60"
               >
                 {loading ? (
                   <>

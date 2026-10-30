@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { getSession, signIn } from "next-auth/react";
-import { Crown, Loader2, Lock, Mail, ShoppingBag, Sparkles, User, X } from "lucide-react";
+import { Crown, Loader2, Lock, Mail, ShoppingBag, Scissors, User, X } from "lucide-react";
 import { roleHome } from "@/lib/roles";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
@@ -81,12 +81,9 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 32, scale: 0.96 }}
             transition={{ type: "spring", damping: 26, stiffness: 300 }}
-            className="relative w-full max-w-md rounded-[26px] bg-gradient-to-b from-amber-400/80 via-amber-600/25 to-amber-400/60 p-[1.5px] shadow-[0_0_80px_-20px_rgba(245,158,11,0.45)]"
+            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-zinc-950 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.8)]"
           >
-            <div className="overflow-hidden rounded-[24px] bg-zinc-950">
-              {/* golden top edge */}
-              <div className="h-1 w-full bg-gradient-to-r from-amber-700 via-amber-400 to-amber-700" />
-
+            <div className="overflow-hidden rounded-2xl">
               <button
                 onClick={onClose}
                 className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full text-zinc-500 transition-colors hover:bg-white/10 hover:text-zinc-100"
@@ -97,8 +94,8 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
 
               <div className="p-8">
                 <div className="mb-7 text-center">
-                  <span className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-amber-500 text-zinc-950 shadow-[0_0_36px_-6px_rgba(245,158,11,0.7)]">
-                    <Sparkles className="h-5 w-5" />
+                  <span className="mx-auto mb-4 grid h-11 w-11 place-items-center rounded-lg bg-amber-500 text-zinc-950">
+                    <Scissors className="h-5 w-5" />
                   </span>
                   <h2 className="font-display text-3xl text-white">Welcome back</h2>
                   <p className="mt-1.5 text-sm text-zinc-400">
@@ -108,7 +105,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <label className="block">
-                    <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                    <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
                       Email
                     </span>
                     <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 transition-colors focus-within:border-amber-500/60">
@@ -170,7 +167,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                 {/* OAuth divider */}
                 <div className="my-6 flex items-center gap-3">
                   <span className="h-px flex-1 bg-white/10" />
-                  <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-zinc-600">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-600">
                     or
                   </span>
                   <span className="h-px flex-1 bg-white/10" />
@@ -181,7 +178,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                 {/* divider */}
                 <div className="my-7 flex items-center gap-3">
                   <span className="h-px flex-1 bg-white/10" />
-                  <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-zinc-600">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-600">
                     Quick demo login
                   </span>
                   <span className="h-px flex-1 bg-white/10" />

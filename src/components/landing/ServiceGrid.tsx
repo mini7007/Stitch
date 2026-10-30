@@ -56,7 +56,7 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
       transition={{ duration: 0.8, delay: index * 0.12, ease: EASE }}
       whileHover="hover"
       variants={{ hover: { scale: 0.99 } }}
-      className={`group relative cursor-pointer overflow-hidden rounded-[2rem] shadow-xl ring-1 transition-shadow ${
+      className={`group relative cursor-pointer overflow-hidden rounded-xl shadow-xl ring-1 transition-shadow ${
         service.highlighted
           ? "ring-amber-500/60 hover:shadow-[0_0_60px_-12px_rgba(245,158,11,0.55)]"
           : "ring-zinc-950/10 hover:shadow-[0_0_60px_-14px_rgba(245,158,11,0.45)] hover:ring-amber-500/70"
@@ -135,13 +135,16 @@ export default function ServiceGrid() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, ease: EASE }}
-          className="mx-auto max-w-2xl text-center"
+          className="max-w-2xl"
         >
-          <p className="text-xs font-bold uppercase tracking-[0.4em] text-amber-600">
-            Our Services
-          </p>
+          <div className="flex items-center gap-4">
+            <span className="h-px w-10 bg-amber-600" />
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600">
+              Our Services
+            </p>
+          </div>
           <h2 className="mt-5 font-display text-4xl text-zinc-950 md:text-5xl">
-            Everything your wardrobe needs, <span className="italic text-amber-600">handled.</span>
+            Everything your wardrobe needs, <span className="text-amber-600">handled.</span>
           </h2>
           <p className="mt-5 text-lg text-zinc-500">
             Four crafts, one tap. Pick a service and we handle the rest — door to door.

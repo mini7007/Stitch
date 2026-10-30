@@ -3,7 +3,7 @@ import { signIn, getSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, Lock, Mail, Sparkles } from "lucide-react";
+import { Loader2, Lock, Mail, Scissors } from "lucide-react";
 import { roleHome } from "@/lib/roles";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
@@ -47,26 +47,22 @@ export default function Login() {
       <div aria-hidden className="pointer-events-none absolute -left-40 -top-40 h-[30rem] w-[30rem] rounded-full bg-amber-600/10 blur-[140px]" />
       <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-40 h-[30rem] w-[30rem] rounded-full bg-amber-500/10 blur-[140px]" />
 
-      {/* golden-border card */}
-      <div className="relative w-full max-w-md rounded-[26px] bg-gradient-to-b from-amber-400/80 via-amber-600/25 to-amber-400/60 p-[1.5px] shadow-[0_0_80px_-20px_rgba(245,158,11,0.45)]">
-        <div className="overflow-hidden rounded-[24px] bg-zinc-950">
-          {/* golden top edge */}
-          <div className="h-1 w-full bg-gradient-to-r from-amber-700 via-amber-400 to-amber-700" />
-
-          <div className="p-8 sm:p-10">
-            <div className="mb-8 text-center">
-              <span className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-amber-500 text-zinc-950 shadow-[0_0_36px_-6px_rgba(245,158,11,0.7)]">
-                <Sparkles className="h-5 w-5" />
-              </span>
-              <h1 className="font-display text-3xl text-white">Sign in to Stitch</h1>
-              <p className="mt-1.5 text-sm text-zinc-400">
-                Welcome back — your tailor awaits
-              </p>
-            </div>
+      {/* card */}
+      <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900/40 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.8)] backdrop-blur-sm">
+        <div className="p-8 sm:p-10">
+          <div className="mb-8 text-center">
+            <span className="mx-auto mb-4 grid h-11 w-11 place-items-center rounded-lg bg-amber-500 text-zinc-950">
+              <Scissors className="h-5 w-5" />
+            </span>
+            <h1 className="font-display text-3xl text-white">Sign in to Stitch</h1>
+            <p className="mt-1.5 text-sm text-zinc-400">
+              Welcome back — your tailor awaits
+            </p>
+          </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <label className="block">
-                <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
                   Email
                 </span>
                 <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 transition-colors focus-within:border-amber-500/60">
@@ -83,7 +79,7 @@ export default function Login() {
               </label>
 
               <label className="block">
-                <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
                   Password
                 </span>
                 <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 transition-colors focus-within:border-amber-500/60">
@@ -116,7 +112,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={pending}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3.5 text-sm font-semibold text-zinc-950 shadow-[0_0_30px_-8px_rgba(245,158,11,0.7)] transition-all hover:bg-amber-400 hover:scale-[1.02] active:scale-95 disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-400 active:scale-[0.99] disabled:opacity-60"
               >
                 {pending ? (
                   <>
@@ -131,7 +127,7 @@ export default function Login() {
             {/* OAuth divider */}
             <div className="my-6 flex items-center gap-3">
               <span className="h-px flex-1 bg-white/10" />
-              <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-zinc-600">
+              <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-600">
                 or
               </span>
               <span className="h-px flex-1 bg-white/10" />
@@ -145,7 +141,6 @@ export default function Login() {
                 Create an account
               </Link>
             </p>
-          </div>
         </div>
       </div>
     </main>

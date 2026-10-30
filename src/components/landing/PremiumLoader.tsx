@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
  *   2. A golden thread draws itself across the screen; the needle rides its tip.
  *   3. Scissors open in anticipation… then SNAP shut with spring physics —
  *      the loose thread tail falls away.
- *   4. The STITCH wordmark resolves from blur, like a film title.
+ *   4. The Stitch wordmark resolves from blur, like a film title.
  *   5. On exit the two dark panels part like a curtain, revealing the hero.
  */
 
@@ -150,13 +150,14 @@ function WorkshopScene() {
 function Wordmark() {
   return (
     <div className="relative mt-4 text-center">
-      <div className="flex items-baseline justify-center gap-[0.22em] font-display text-6xl md:text-7xl tracking-[0.3em] text-zinc-100 select-none">
-        {"STITCH".split("").map((ch, i) => (
+      <div className="flex items-baseline justify-center font-display text-6xl font-semibold tracking-[0.06em] text-zinc-100 select-none md:text-7xl">
+        {"Stitch.".split("").map((ch, i) => (
           <motion.span
             key={i}
             initial={{ opacity: 0, y: 34, filter: "blur(16px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ delay: 1.95 + i * 0.085, type: "spring", stiffness: 110, damping: 17 }}
+            className={ch === "." ? "text-amber-500" : undefined}
           >
             {ch}
           </motion.span>
@@ -173,7 +174,7 @@ function Wordmark() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 2.65, duration: 0.5 }}
-        className="mt-4 text-[11px] uppercase tracking-[0.55em] text-amber-500"
+        className="mt-4 text-[11px] uppercase tracking-[0.22em] text-amber-500"
       >
         Craftsmanship, delivered
       </motion.p>

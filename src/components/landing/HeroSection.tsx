@@ -44,7 +44,7 @@ export default function HeroSection({ onBook }: { onBook: () => void }) {
           className="flex items-center gap-4"
         >
           <span className="h-px w-12 bg-amber-500" />
-          <p className="text-[11px] font-semibold uppercase tracking-[0.45em] text-amber-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-500">
             The doorstep atelier
           </p>
         </motion.div>
@@ -53,10 +53,10 @@ export default function HeroSection({ onBook }: { onBook: () => void }) {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.9, ease: EASE }}
-          className="mt-7 max-w-3xl font-display text-5xl leading-[1.04] text-white sm:text-6xl lg:text-7xl"
+          className="mt-7 max-w-3xl font-display text-5xl leading-[1.02] text-white sm:text-6xl lg:text-7xl"
         >
-          Master Tailors. Expert Cobblers.{" "}
-          <span className="italic text-amber-400">At Your Doorstep.</span>
+          Master tailors. Expert cobblers.{" "}
+          <span className="block font-normal text-amber-400">At your doorstep.</span>
         </motion.h1>
 
         <motion.p
@@ -77,38 +77,37 @@ export default function HeroSection({ onBook }: { onBook: () => void }) {
         >
             <button
               onClick={onBook}
-              className="group flex items-center gap-2.5 rounded-full bg-amber-500 px-9 py-4 text-sm font-semibold text-zinc-950 shadow-[0_0_40px_-8px_rgba(245,158,11,0.6)] transition-all hover:scale-[1.03] hover:bg-amber-400 active:scale-95"
+              className="group flex items-center gap-2.5 rounded-lg bg-amber-500 px-8 py-3.5 text-sm font-semibold text-zinc-950 transition-all hover:bg-amber-400 active:scale-95"
             >
               Book a Service
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </button>
             <a
               href="#services"
-              className="rounded-full border border-white/25 px-9 py-4 text-sm font-medium text-zinc-100 backdrop-blur-sm transition-colors hover:border-amber-400/70 hover:text-amber-300"
+              className="rounded-lg border border-white/25 px-8 py-3.5 text-sm text-zinc-100 backdrop-blur-sm transition-colors hover:border-amber-400/70 hover:text-amber-300"
             >
               View Services
             </a>
         </motion.div>
 
-        {/* trust chips */}
+        {/* trust stats — quiet inline row */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0, duration: 0.7, ease: EASE }}
-          className="mt-14 flex flex-wrap items-center gap-3 text-sm"
+          className="mt-14 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-zinc-400"
         >
-          <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md">
+          <span className="flex items-center gap-2">
             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-            <span className="font-semibold text-white">4.9</span>
-            <span className="text-zinc-400">· 12,000+ reviews</span>
+            <span className="font-semibold text-white">4.9</span> · 12,000+ reviews
           </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md">
-            <span className="font-semibold text-white">500+</span>{" "}
-            <span className="text-zinc-400">verified artisans</span>
+          <span className="hidden h-4 w-px bg-white/15 sm:block" />
+          <span>
+            <span className="font-semibold text-white">500+</span> verified artisans
           </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md">
-            <span className="font-semibold text-white">30 min</span>{" "}
-            <span className="text-zinc-400">free pickup</span>
+          <span className="hidden h-4 w-px bg-white/15 sm:block" />
+          <span>
+            <span className="font-semibold text-white">30 min</span> free pickup
           </span>
         </motion.div>
       </motion.div>

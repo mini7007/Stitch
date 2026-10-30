@@ -3,6 +3,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, Home, Scissors, ShoppingBag } from "lucide-react";
+import Wordmark from "@/components/Wordmark";
 
 /**
  * Global navbar.
@@ -26,9 +27,7 @@ export default function Navbar() {
   return (
     <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
       <div className="flex items-center gap-6">
-        <Link href="/" className="text-xl font-bold text-slate-900 flex items-center gap-2">
-          <Scissors className="w-5 h-5" /> Stitch
-        </Link>
+        <Wordmark className="text-xl text-slate-900" />
         {session?.user?.role === "CUSTOMER" && (
           <div className="flex gap-4 text-sm font-medium text-slate-600">
             <Link href="/customer/dashboard" className="hover:text-slate-900 flex items-center gap-1"><Home className="w-4 h-4"/> Dashboard</Link>

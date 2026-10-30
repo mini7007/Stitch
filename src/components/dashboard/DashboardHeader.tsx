@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { LogOut, Scissors } from "lucide-react";
+import Wordmark from "@/components/Wordmark";
 
 /** Slim light header shared by all dashboards. */
 export default function DashboardHeader({
@@ -19,10 +20,10 @@ export default function DashboardHeader({
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2.5">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-amber-500 text-zinc-950">
-              <Scissors className="h-4 w-4" />
+            <span className="grid h-7 w-7 place-items-center rounded-md bg-amber-500 text-zinc-950">
+              <Scissors className="h-3.5 w-3.5" />
             </span>
-            <span className="font-display text-lg tracking-[0.3em] text-slate-900">STITCH</span>
+            <Wordmark className="text-lg text-slate-900" />
           </Link>
           <span className="hidden h-5 w-px bg-slate-200 sm:block" />
           <span className="hidden text-sm text-slate-500 sm:block">{subtitle}</span>

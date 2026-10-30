@@ -55,13 +55,16 @@ export default function VendorShowcase() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, ease: EASE }}
-          className="mx-auto max-w-2xl text-center"
+          className="max-w-2xl"
         >
-          <p className="text-xs font-bold uppercase tracking-[0.4em] text-amber-500">
-            The Network
-          </p>
+          <div className="flex items-center gap-4">
+            <span className="h-px w-10 bg-amber-500" />
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-500">
+              The Network
+            </p>
+          </div>
           <h2 className="mt-5 font-display text-4xl text-white md:text-5xl">
-            Top Rated <span className="italic text-amber-400">Professionals</span>
+            Top Rated <span className="text-amber-400">Professionals</span>
           </h2>
           <p className="mt-5 text-lg text-zinc-400">
             Every artisan is background-verified, reviewed after each order, and
@@ -78,7 +81,7 @@ export default function VendorShowcase() {
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.8, delay: i * 0.14, ease: EASE }}
               whileHover="hover"
-              className="group relative overflow-hidden rounded-[2rem] bg-zinc-900 shadow-xl ring-1 ring-white/10 transition-colors hover:ring-amber-500/60"
+              className="group relative overflow-hidden rounded-xl bg-zinc-900 shadow-xl ring-1 ring-white/10 transition-colors hover:ring-amber-500/60"
             >
               {/* portrait */}
               <motion.div

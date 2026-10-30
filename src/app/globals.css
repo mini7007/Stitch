@@ -28,19 +28,7 @@ html {
   background: #dfaf35;
 }
 
-/* Shimmering gold text */
+/* Warm gold emphasis — solid, no shimmering gradient */
 .gold-text {
-  background: linear-gradient(
-    100deg,
-    #86541c 15%,
-    #e7c45c 40%,
-    #fbf8eb 50%,
-    #e7c45c 60%,
-    #86541c 85%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmer 4s linear infinite;
+  color: #dfa93c;
 }

@@ -74,7 +74,7 @@ export default function GoogleSignInButton({ className = "" }: { className?: str
 
   return (
     <div className={className}>
-      <p className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-500">
+      <p className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
         Continue with Google as
       </p>
       <div className="mb-3 grid grid-cols-3 gap-2">

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Scissors } from "lucide-react";
 import { roleHome } from "@/lib/roles";
 
 function readCookie(name: string): string | null {
@@ -55,7 +55,7 @@ export default function OAuthWelcome() {
 
       <div className="relative flex flex-col items-center gap-5 text-center">
         <span className="grid h-14 w-14 place-items-center rounded-2xl bg-amber-500 text-zinc-950 shadow-[0_0_36px_-6px_rgba(245,158,11,0.7)]">
-          <Sparkles className="h-6 w-6" />
+          <Scissors className="h-6 w-6" />
         </span>
         <h1 className="font-display text-2xl text-white">Threading you in…</h1>
         <p className="flex items-center gap-2 text-sm text-zinc-400">
