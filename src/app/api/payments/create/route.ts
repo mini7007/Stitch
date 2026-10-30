@@ -72,16 +72,20 @@ export async function POST(req: Request) {
       rzpRes = await fetch("https://api.razorpay.com/v1/payment_links", {
         method: "POST",
         headers: { authorization: `Basic ${auth}`, "content-type": "application/json" },
+        /* Razorpay hard-rejects fields that aren't part of the core Payment
+           Links schema (feature-gated options surface as 400 "extra fields
+           sent") — keep the payload strictly to the documented basics. The
+           standard hosted page already offers UPI / GPay / PhonePe / Paytm. */
         body: JSON.stringify({
           amount: order.total, // paise
           currency: "INR",
           accept_partial: false,
           reference_id: order.id, // comes back in webhooks → maps to our order
           description: `Stitch order ${order.orderNumber}`,
-          customer: { name: session.user.name ?? undefined, email: session.user.email ?? undefined },
+          ...(session.user.email && {
+            customer: { email: session.user.email, name: session.user.name ?? undefined },
+          }),
           redirect_url: `${appUrl}/customer/orders/${order.id}`, // return to tracking page
-          // UPI-first checkout page
-          config: { checkout: { method: { netbanking: "1", card: "1", upi: "1", wallet: "1" } } },
         }),
         signal: AbortSignal.timeout(RAZORPAY_TIMEOUT_MS),
       });
