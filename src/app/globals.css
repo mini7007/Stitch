@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  /* Keeps anchored sections clear of the fixed header */
+  scroll-padding-top: 5rem;
+}
+
+::selection {
+  background-color: rgba(223, 175, 53, 0.35);
+  color: #fff;
+}
+
+/* Slim premium scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0f1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a3550;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #dfaf35;
+}
+
+/* Shimmering gold text */
+.gold-text {
+  background: linear-gradient(
+    100deg,
+    #86541c 15%,
+    #e7c45c 40%,
+    #fbf8eb 50%,
+    #e7c45c 60%,
+    #86541c 85%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 4s linear infinite;
+}
