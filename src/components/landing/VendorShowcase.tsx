@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, BadgeCheck, Star } from "lucide-react";
+import { ArrowRight, BadgeCheck, Star, Tag } from "lucide-react";
+import { pricingTier } from "@/lib/utils";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -11,6 +12,7 @@ const PROS = [
   {
     name: "Arjun Mehta",
     role: "Master Tailor",
+    category: "tailoring",
     exp: "15 years experience",
     rating: "4.9",
     reviews: "1.2k",
@@ -20,6 +22,7 @@ const PROS = [
   {
     name: "Meena Iyer",
     role: "Bridal & Bespoke Specialist",
+    category: "tailoring",
     exp: "12 years experience",
     rating: "5.0",
     reviews: "860",
@@ -29,6 +32,7 @@ const PROS = [
   {
     name: "Suresh Kumar",
     role: "Master Cobbler",
+    category: "cobbler",
     exp: "20 years experience",
     rating: "4.8",
     reviews: "2.0k",
@@ -108,6 +112,21 @@ export default function VendorShowcase() {
                 <p className="mt-1 text-sm text-amber-300/90">
                   {pro.role} <span className="text-zinc-500">· {pro.exp}</span>
                 </p>
+                {/* pricing-tier badge — visual only, sets expectations */}
+                {(() => {
+                  const tier = pricingTier(pro.category);
+                  return (
+                    <span
+                      className={`mt-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md ${
+                        tier.premium
+                          ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
+                          : "border-white/15 bg-white/5 text-zinc-300"
+                      }`}
+                    >
+                      <Tag className="h-3 w-3" /> {tier.label}
+                    </span>
+                  );
+                })()}
               </div>
             </motion.article>
           ))}
