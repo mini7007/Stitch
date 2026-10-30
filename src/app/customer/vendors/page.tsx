@@ -146,29 +146,37 @@ export default async function VendorList({
                 </div>
               </div>
               <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded-md text-sm font-medium">
-                <Star className="w-4 h-4 fill-yellow-700" /> {vendor.rating}
+                <Star className="w-4 h-4 fill-yellow-700" /> {vendor.rating > 0 ? vendor.rating : "New"}
               </div>
             </div>
 
-            <div className="space-y-2 mb-6 border-t border-slate-100 pt-4">
-              <p className="text-sm font-medium text-slate-700">Services offered:</p>
-              {vendor.services.slice(0, 3).map((service) => (
-                <div key={service.id} className="flex justify-between items-center gap-2 text-sm">
-                  <span className="flex min-w-0 items-center gap-1.5 text-slate-600">
-                    <span className="truncate">{service.name}</span>
-                    <TierBadge categorySlug={service.category?.slug} />
-                  </span>
-                  <span className="font-medium text-slate-900 whitespace-nowrap">
-                    {formatINR(service.basePrice)}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {vendor.services.length > 0 ? (
+              <div className="space-y-2 mb-6 border-t border-slate-100 pt-4">
+                <p className="text-sm font-medium text-slate-700">Services offered:</p>
+                {vendor.services.slice(0, 3).map((service) => (
+                  <div key={service.id} className="flex justify-between items-center gap-2 text-sm">
+                    <span className="flex min-w-0 items-center gap-1.5 text-slate-600">
+                      <span className="truncate">{service.name}</span>
+                      <TierBadge categorySlug={service.category?.slug} />
+                    </span>
+                    <span className="font-medium text-slate-900 whitespace-nowrap">
+                      {formatINR(service.basePrice)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mb-6 border-t border-slate-100 pt-4 text-sm text-slate-400">
+                No services listed yet.
+              </p>
+            )}
 
-            <BookServiceForm
-              vendorId={vendor.id}
-              services={vendor.services.map((s) => ({ id: s.id, name: s.name, basePrice: s.basePrice }))}
-            />
+            {vendor.services.length > 0 && (
+              <BookServiceForm
+                vendorId={vendor.id}
+                services={vendor.services.map((s) => ({ id: s.id, name: s.name, basePrice: s.basePrice }))}
+              />
+            )}
           </div>
         ))}
       </div>
